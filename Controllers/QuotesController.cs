@@ -71,7 +71,7 @@ public class QuotesController : Controller {
        {
             var result = await _quotesService.AddQuoteAsync(dto);
             if(result is null)
-                return NotFound("Dubpicate text.");
+                return NotFound("Duplicate text.");
             return Ok(new APIResponseViewModel(true, 0, result)); 
        }
        catch (Exception ex)
