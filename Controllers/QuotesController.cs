@@ -69,8 +69,10 @@ public class QuotesController : Controller {
     public async Task<ActionResult> AddQuote([FromForm]CreateQuote dto){
        try
        {
-            await _quotesService.AddQuoteAsync(dto);
-            return Ok(new APIResponseViewModel(true)); 
+            var result = await _quotesService.AddQuoteAsync(dto);
+            if(result is null)
+                return NotFound("Dubpicate text.");
+            return Ok(new APIResponseViewModel(true, 0, result)); 
        }
        catch (Exception ex)
        {
@@ -81,8 +83,8 @@ public class QuotesController : Controller {
     public async Task<ActionResult> AddMultipleQuotes([FromBody]List<CreateQuote> dto){
         try
         {
-            await _quotesService.AddMultipleQuotesAsync(dto);
-            return Ok(new APIResponseViewModel(true)); 
+            var result = await _quotesService.AddMultipleQuotesAsync(dto);
+            return Ok(new APIResponseViewModel(true,0, result)); 
         }
         catch (Exception ex)
         {

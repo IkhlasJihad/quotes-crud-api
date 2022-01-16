@@ -11,8 +11,8 @@ public interface IQuotesService {
     Task<(int totalPages, IReadOnlyList<QuotesDBModel>)> QuotesByAuthorAsync(string author, int page=1);
     Task<(int totalPages, IReadOnlyList<QuotesDBModel>)> QuotesByBookAsync(string book, int page=1);
     Task<(int totalPages, IReadOnlyList<QuotesDBModel>)> QuotesByTagAsync(string tag, int page=1);
-    Task AddQuoteAsync(CreateQuote dto);
-    Task AddMultipleQuotesAsync(List<CreateQuote> dto);
+    Task<QuotesDBModel?> AddQuoteAsync(CreateQuote dto);
+    Task<List<QuotesDBModel>> AddMultipleQuotesAsync(List<CreateQuote> dto);
     Task<ReplaceOneResult> UpdateAsync(UpdateQuote dto);
     Task<bool> DeleteAsync(string _id);
     Task<(int, IReadOnlyList<QuotesDBModel>)> Search(string keyword, int page);

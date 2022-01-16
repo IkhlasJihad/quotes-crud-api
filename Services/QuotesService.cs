@@ -103,7 +103,7 @@ public class QuotesService : IQuotesService
             throw ex;
         }
     }
-    public async Task AddQuoteAsync(CreateQuote dto){
+    public async Task<QuotesDBModel?> AddQuoteAsync(CreateQuote dto){
         try
         {
             if(String.IsNullOrEmpty(dto.Text))
@@ -111,23 +111,26 @@ public class QuotesService : IQuotesService
             if(String.IsNullOrEmpty(dto.Author))
                 throw new MissedAuthorFieldException();
             var quote = await GetQuoteByText(dto.Text);
-            if(quote is null)
-                await _quotesCollection.InsertOneAsync(new QuotesDBModel(){
-                        Text = dto.Text,
-                        Author = dto.Author,
-                        Book = dto.Book,
-                        Tags = dto.Tags
-                    });    
+            var newQuote = new QuotesDBModel();
+            if(quote is null){
+                newQuote.Text = dto.Text;
+                newQuote.Author = dto.Author;
+                newQuote.Book = dto.Book;
+                newQuote.Tags = dto.Tags;
+                await _quotesCollection.InsertOneAsync(newQuote); 
+                return newQuote; 
+            }
+            else return null;
         }
         catch (Exception ex)
         {   
             throw ex;
         }
     }
-    public async Task AddMultipleQuotesAsync(List<CreateQuote> dto){
+    public async Task<List<QuotesDBModel>> AddMultipleQuotesAsync(List<CreateQuote> dto){
         try
         {
-            var quotes = new List<QuotesDBModel>();
+            List<QuotesDBModel> newQuotes = new List<QuotesDBModel>();
             foreach (var q in dto)
             {
                 if(String.IsNullOrEmpty(q.Text))
@@ -136,14 +139,15 @@ public class QuotesService : IQuotesService
                     throw new MissedAuthorFieldException();
                 var quote = await GetQuoteByText(q.Text);
                 if(quote is null)
-                        quotes.Add( new QuotesDBModel(){
+                        newQuotes.Add( new QuotesDBModel(){
                             Text = q.Text,
                             Author = q.Author,
                             Book = q.Book,
                             Tags = q.Tags
                         });
             }
-            await _quotesCollection.InsertManyAsync(quotes);    
+            await _quotesCollection.InsertManyAsync(newQuotes); 
+            return newQuotes;   
         }
         catch (Exception ex)
         {
