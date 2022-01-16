@@ -2,7 +2,7 @@
 CRUD Goodreads Quotes API, it's using the database created with the code here: https://github.com/IkhlasJihad/goodreadsQuotesScrap
 
 
-### Avaialable Endpoints:
+### Available Endpoints:
 - /all >> queries all available quotes.
 - /author/:authorName >> queries quotes for the given author
 - /tag/:tag >> queries quotes having the given tag in their tags list
