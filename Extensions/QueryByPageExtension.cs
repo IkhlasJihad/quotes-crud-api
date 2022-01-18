@@ -51,6 +51,8 @@ public static class QueryByPageExtension
             .Match(filterDefinition)
             .Facet(countFacet, dataFacet)
             .ToListAsync();
+        if(aggregation.Count == 0)
+            throw new EmptyResultException();
 
         var count = aggregation.First()
             .Facets.First(x => x.Name == "count")

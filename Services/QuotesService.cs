@@ -55,13 +55,12 @@ public class QuotesService : IQuotesService
     public async Task<(int, IReadOnlyList<QuotesDBModel>)> QuotesByAuthorAsync(string author, int page=1){
         try
         {
+            var filter = Builders<QuotesDBModel>.Filter.Eq(q => q.Author, author);
+            await IsExisted(filter);
             var result = await _quotesCollection.AggregateByPage(
-                Builders<QuotesDBModel>.Filter.Eq(q => q.Author, author),
+                filter,
                 page: page
             ); 
-            if(result.Item1 == 0){
-                throw new EmptyResultException();
-            }
             return result;
         }
         catch (Exception ex)
@@ -72,13 +71,12 @@ public class QuotesService : IQuotesService
     public async Task<(int, IReadOnlyList<QuotesDBModel>)> QuotesByBookAsync(string book, int page=1){ 
         try
         {
+            var filter = Builders<QuotesDBModel>.Filter.Eq(q => q.Book, book);
+            await IsExisted(filter);
             var result = await _quotesCollection.AggregateByPage(
-                Builders<QuotesDBModel>.Filter.Eq(q => q.Book, book),
+                filter,
                 page: page
             );
-            if(result.Item1 == 0){
-                throw new EmptyResultException();
-            }
             return result;    
         }
         catch (Exception ex)
@@ -89,13 +87,12 @@ public class QuotesService : IQuotesService
     public async Task<(int, IReadOnlyList<QuotesDBModel>)> QuotesByTagAsync(string tag, int page=1){
         try
         { 
+            var filter =  Builders<QuotesDBModel>.Filter.AnyEq(q => q.Tags, tag);
+            await IsExisted(filter);
             var result =  await _quotesCollection.AggregateByPage(
-                Builders<QuotesDBModel>.Filter.AnyEq(q => q.Tags, tag),
+                filter,
                 page: page
             ); 
-            if(result.Item1 == 0){
-                throw new EmptyResultException();
-            }
             return result;
         }
         catch (Exception ex)
@@ -218,11 +215,17 @@ public class QuotesService : IQuotesService
             */
                 Builders<QuotesDBModel>.Filter.Text(keyword), page
             );
-            if(result.Item2 is null || result.Item2.Count == 0)
-                throw new NoMatchingQuoteException();
             return result;
         } catch(Exception ex){
             throw ex;
         }
+    }
+
+    public async Task IsExisted(FilterDefinition<QuotesDBModel> filter)
+    {
+        var result =  await _quotesCollection.Find(filter).FirstOrDefaultAsync();
+        if(result is null)
+            throw new EmptyResultException();
+        return;
     }
 }
