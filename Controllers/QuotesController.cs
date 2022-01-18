@@ -6,7 +6,7 @@ using QuotesAPI.DTOs;
 namespace QuotesAPI.Controllers;
 
 [ApiController]
-[Route("api/[controller]/")]
+[Route("quotes/")]
 public class QuotesController : Controller {
     private readonly IQuotesService _quotesService;
     public QuotesController(IQuotesService quotesService){
