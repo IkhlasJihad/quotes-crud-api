@@ -12,9 +12,13 @@ CRUD Goodreads Quotes API, it's using the database created with the code here: h
 - addMany >> accepts list of new quotes passed in body, returning list of documnets.
 - delete/:id >> deletes the quote with the given id.
 - update >> updates the given quote if it's matching one exists.
-- search/:keyword >> applies [text-search](https://docs.mongodb.com/manual/text-search/) for quotes having the given keyword, using string values in (tags and text) fields.
+- search/:keyword >> applies [text-search](https://docs.mongodb.com/manual/text-search/) for quotes having the given keyword, using string values in (tags and text) fields. If no *keyword* is given, it works as /all endpoint.
 
-#### Notes:
+### Notes:
 * Pagination is supported, there are max of 30 quotes per page.
-* Both text & author fields are reqired in add & update.
 * Default page is 1, pages allowed within the range given in the response, otherwise error message will appear.
+* Both text & author fields are required in add & update.
+
+### Sample Run:
+
+[Link on Vimeo](https://vimeo.com/667375898)
