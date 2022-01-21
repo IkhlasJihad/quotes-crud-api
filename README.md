@@ -4,6 +4,7 @@ CRUD Goodreads Quotes API, it's using the database created with the code here: h
 
 ### Available Endpoints:
 - /all >> queries all available quotes.
+- /random >> queries the text of a single random quote.
 - /author/:authorName >> queries quotes for the given author
 - /tag/:tag >> queries quotes having the given tag in their tags list
 - /book/:book >> queries quotes of the given book

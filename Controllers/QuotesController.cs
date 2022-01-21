@@ -26,6 +26,19 @@ public class QuotesController : Controller {
         }   
     }
 
+    [HttpGet("random")]
+    public async Task<ActionResult> RandomQuote(){
+        try
+        {
+            var result = await _quotesService.RandomQuote();
+            return Ok(new APIResponseViewModel(true, 1, result));    
+        }
+        catch (Exception ex)
+        {
+            return NotFound(ex.Message);
+        }   
+    }
+
     [HttpGet("auhtor/{author}")]
     public async Task<ActionResult> QuotesbyAuthor(string author, int page=1){
         try

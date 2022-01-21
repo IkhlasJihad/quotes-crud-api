@@ -11,8 +11,10 @@ namespace QuotesAPI.Services;
 public class QuotesService : IQuotesService
 {
     private readonly IMongoCollection<QuotesDBModel> _quotesCollection;
+    private readonly string[] RANDOM_TAGS;
     public QuotesService(IQuotesDBContext _db){
         _quotesCollection = _db.GetQuotesCollection<QuotesDBModel>();
+        RANDOM_TAGS = new []{ "حكمة", "أدب", "حياة", "شعر", "inspirational", "motivation", "life", "wisdom", "hope", "think", "poetry"};
     }
 
     public async Task<(int, IReadOnlyList<QuotesDBModel>)> QuotesAsync(int page=1){
@@ -22,6 +24,27 @@ public class QuotesService : IQuotesService
                 Builders<QuotesDBModel>.Filter.Empty,
                 page: page
             );    
+        }
+        catch (Exception ex)
+        {
+            throw ex;
+        }
+    }
+
+    public async Task<string> RandomQuote(){
+        try
+        {
+            var filter = Builders<QuotesDBModel>.Filter.AnyIn(q => q.Tags, RANDOM_TAGS);
+            FindOptions<QuotesDBModel> findOptions = new FindOptions<QuotesDBModel>(){
+                Projection = Builders<QuotesDBModel>.Projection.Include(q => q.Text)
+            };         
+            var quotes = await (await _quotesCollection.FindAsync(filter, findOptions)).ToListAsync();
+            if(quotes.Count > 0){
+                var randomIndex = new Random().Next(quotes.Count);
+                return quotes[(int)randomIndex].Text;
+            }
+            else
+                throw new EmptyResultException();
         }
         catch (Exception ex)
         {

@@ -7,7 +7,9 @@ using MongoDB.Driver;
 namespace QuotesAPI.Services;
 public interface IQuotesService {
     Task<(int totalPages, IReadOnlyList<QuotesDBModel>)> QuotesAsync(int page=1);
+    Task<string> RandomQuote();
     Task<QuotesDBModel> GetQuoteById(string id);
+
     Task<(int totalPages, IReadOnlyList<QuotesDBModel>)> QuotesByAuthorAsync(string author, int page=1);
     Task<(int totalPages, IReadOnlyList<QuotesDBModel>)> QuotesByBookAsync(string book, int page=1);
     Task<(int totalPages, IReadOnlyList<QuotesDBModel>)> QuotesByTagAsync(string tag, int page=1);
