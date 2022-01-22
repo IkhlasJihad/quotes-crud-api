@@ -1,11 +1,14 @@
 using Microsoft.OpenApi.Models;
-using Microsoft.Extensions.Options;
 using QuotesAPI.Services;
-using QuotesAPI.Models;
 using QuotesAPI.Data;
 using QuotesAPI.AutoMapper;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
+// this is setup for publishing the app to cloud
+builder.WebHost.ConfigureKestrel(serverOptions => {
+   serverOptions.Listen(IPAddress.Any, Convert.ToInt32(Environment.GetEnvironmentVariable("PORT"))); 
+});
 // Add services to the container.
 builder.Services.Configure<DBSettings>(
     builder.Configuration.GetSection("QuotesDBSettings"));
