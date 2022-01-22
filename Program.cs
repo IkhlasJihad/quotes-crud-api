@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using QuotesAPI.Services;
 using QuotesAPI.Models;
 using QuotesAPI.Data;
+using QuotesAPI.AutoMapper;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -28,7 +29,7 @@ builder.Services.AddSwaggerGen(c =>
     }
 );
 builder.Services.AddEndpointsApiExplorer();
-
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

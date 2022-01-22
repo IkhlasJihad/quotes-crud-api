@@ -4,26 +4,31 @@ using QuotesAPI.Models;
 using QuotesAPI.Extensions;
 using QuotesAPI.DTOs;
 using QuotesAPI.Data;
+using QuotesAPI.ViewModels;
 using QuotesAPI.Exceptions;
+using AutoMapper;
 
 namespace QuotesAPI.Services;
 
 public class QuotesService : IQuotesService
 {
     private readonly IMongoCollection<QuotesDBModel> _quotesCollection;
+    private readonly IMapper _mapper;
     private readonly string[] RANDOM_TAGS;
-    public QuotesService(IQuotesDBContext _db){
+    public QuotesService(IQuotesDBContext _db, IMapper mapper){
         _quotesCollection = _db.GetQuotesCollection<QuotesDBModel>();
+        _mapper = mapper;
         RANDOM_TAGS = new []{ "حكمة", "أدب", "حياة", "شعر", "inspirational", "motivation", "life", "wisdom", "hope", "think", "poetry"};
     }
 
-    public async Task<(int, IReadOnlyList<QuotesDBModel>)> QuotesAsync(int page=1){
+    public async Task<(int, IReadOnlyList<QuotesViewModel>)> QuotesAsync(int page=1){
         try
         {
-            return await _quotesCollection.AggregateByPage(
+            var result =  await _quotesCollection.AggregateByPage(
                 Builders<QuotesDBModel>.Filter.Empty,
                 page: page
             );    
+            return (result.Item1, _mapper.Map<List<QuotesViewModel>>(result.Item2));
         }
         catch (Exception ex)
         {
@@ -75,7 +80,7 @@ public class QuotesService : IQuotesService
         }
     }
         
-    public async Task<(int, IReadOnlyList<QuotesDBModel>)> QuotesByAuthorAsync(string author, int page=1){
+    public async Task<(int, IReadOnlyList<QuotesViewModel>)> QuotesByAuthorAsync(string author, int page=1){
         try
         {
             var filter = Builders<QuotesDBModel>.Filter.Eq(q => q.Author, author);
@@ -84,14 +89,14 @@ public class QuotesService : IQuotesService
                 filter,
                 page: page
             ); 
-            return result;
+            return (result.Item1, _mapper.Map<List<QuotesViewModel>>(result.Item2));
         }
         catch (Exception ex)
         {
             throw ex;
         } 
     }
-    public async Task<(int, IReadOnlyList<QuotesDBModel>)> QuotesByBookAsync(string book, int page=1){ 
+    public async Task<(int, IReadOnlyList<QuotesViewModel>)> QuotesByBookAsync(string book, int page=1){ 
         try
         {
             var filter = Builders<QuotesDBModel>.Filter.Eq(q => q.Book, book);
@@ -100,14 +105,14 @@ public class QuotesService : IQuotesService
                 filter,
                 page: page
             );
-            return result;    
+            return (result.Item1, _mapper.Map<List<QuotesViewModel>>(result.Item2));
         }
         catch (Exception ex)
         {  
             throw ex;
         }       
     }
-    public async Task<(int, IReadOnlyList<QuotesDBModel>)> QuotesByTagAsync(string tag, int page=1){
+    public async Task<(int, IReadOnlyList<QuotesViewModel>)> QuotesByTagAsync(string tag, int page=1){
         try
         { 
             var filter =  Builders<QuotesDBModel>.Filter.AnyEq(q => q.Tags, tag);
@@ -116,7 +121,7 @@ public class QuotesService : IQuotesService
                 filter,
                 page: page
             ); 
-            return result;
+            return (result.Item1, _mapper.Map<List<QuotesViewModel>>(result.Item2));
         }
         catch (Exception ex)
         {     
@@ -222,23 +227,14 @@ public class QuotesService : IQuotesService
         }    
     }
 
-    public async Task<(int, IReadOnlyList<QuotesDBModel>)> Search(string keyword, int page){
+    public async Task<(int, IReadOnlyList<QuotesViewModel>)> Search(string keyword, int page){
         try
         {
             var result =  await _quotesCollection.AggregateByPage(
-            /*
-            Builders<QuotesDBModel>.Filter.Or(
-                new []{
-                    Builders<QuotesDBModel>.Filter.AnyEq(q => q.Tags, keyword),
-                    Builders<QuotesDBModel>.Filter.Text(keyword, new TextSearchOptions(){
-                        Language = lang
-                    })
-                }
-            ),
-            */
-                Builders<QuotesDBModel>.Filter.Text(keyword), page
+                Builders<QuotesDBModel>.Filter.Text(keyword), 
+                page
             );
-            return result;
+            return (result.Item1, _mapper.Map<List<QuotesViewModel>>(result.Item2));
         } catch(Exception ex){
             throw ex;
         }
