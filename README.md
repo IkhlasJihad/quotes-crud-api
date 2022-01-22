@@ -1,5 +1,8 @@
-# quotes-crud-api
-CRUD Goodreads Quotes API, it's using the database created with the code here: https://github.com/IkhlasJihad/goodreadsQuotesScrap
+# quotes-crud-api 
+    
+   Check at [Heroku](https://i-cita.herokuapp.com/)
+
+CRUD Goodreads Quotes API, it's basically using the database created with the code here: https://github.com/IkhlasJihad/goodreadsQuotesScrap
 
 
 ### Available Endpoints:
