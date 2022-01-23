@@ -61,6 +61,8 @@ public class QuotesService : IQuotesService
         try
         {
             var result = await _quotesCollection.Find(q => q.Id == id).FirstOrDefaultAsync();
+            if(result is null)
+                throw new NoMatchingQuoteException();
             return result;
         }
         catch (Exception ex)
@@ -72,6 +74,8 @@ public class QuotesService : IQuotesService
         try
         {
             var result = await _quotesCollection.Find(q => q.Text == text).FirstOrDefaultAsync();
+            if(result is null)
+                throw new NoMatchingQuoteException();
             return result;
         }
         catch (Exception ex)
@@ -244,7 +248,7 @@ public class QuotesService : IQuotesService
     {
         var result =  await _quotesCollection.Find(filter).FirstOrDefaultAsync();
         if(result is null)
-            throw new EmptyResultException();
+            throw new NoMatchingQuoteException();
         return;
     }
 }

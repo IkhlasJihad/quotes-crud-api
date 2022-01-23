@@ -8,7 +8,7 @@ namespace QuotesAPI.Exceptions
 {
     public class NoMatchingQuoteException : Exception
     {
-        public NoMatchingQuoteException() : base("No matching quote exists")
+        public NoMatchingQuoteException() : base("No matching quote/s")
         {
 
         }

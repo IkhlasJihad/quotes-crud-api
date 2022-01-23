@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using QuotesAPI.Services;
 using QuotesAPI.ViewModels;
 using QuotesAPI.DTOs;
+using QuotesAPI.Exceptions;
 
 namespace QuotesAPI.Controllers;
 
@@ -18,11 +19,15 @@ public class QuotesController : Controller {
         try
         {
             var result = await _quotesService.QuotesAsync(page);
-            return Ok(new APIResponseViewModel(true, result.Item1, result.Item2));    
+            return Ok(new APIResponseViewModel(result.Item1, result.Item2));    
+        }
+        catch (PageOutOfRangeException ex)
+        {
+            return BadRequest(new APIExceptionViewModel(ex.Message));
         }
         catch (Exception ex)
         {
-            return NotFound(ex.Message);
+            return NotFound(new APIExceptionViewModel(ex.Message));
         }   
     }
 
@@ -31,50 +36,80 @@ public class QuotesController : Controller {
         try
         {
             var result = await _quotesService.RandomQuote();
-            return Ok(new APIResponseViewModel(true, 1, result));    
+            return Ok(new APIResponseViewModel(1, result));    
         }
         catch (Exception ex)
         {
-            return NotFound(ex.Message);
+            return NotFound(new APIExceptionViewModel(ex.Message));
         }   
     }
 
-    [HttpGet("auhtor/{author}")]
-    public async Task<ActionResult> QuotesbyAuthor(string author, int page=1){
+    [HttpGet("author")]
+    public async Task<ActionResult> QuotesbyAuthor(string? author, int page=1){
         try
         {
+            if(string.IsNullOrEmpty(author))
+                return BadRequest(new APIExceptionViewModel("author field is required"));
             var result = await _quotesService.QuotesByAuthorAsync(author, page);
-            return Ok(new APIResponseViewModel(true, result.Item1, result.Item2));   
+            return Ok(new APIResponseViewModel(result.Item1, result.Item2));   
+        }
+        catch (EmptyResultException)
+        {
+            return NoContent();
+        }
+        catch (PageOutOfRangeException ex)
+        {
+            return BadRequest(new APIExceptionViewModel(ex.Message));
         }
         catch (Exception ex)
         {
-            return NotFound(ex.Message);
+            return NotFound(new APIExceptionViewModel(ex.Message));
         }
            
     }
-    [HttpGet("book/{book}")]
-    public async Task<ActionResult> QuotesbyBook(string book, int page=1){
+    [HttpGet("book")]
+    public async Task<ActionResult> QuotesbyBook(string? book, int page=1){
         try
         {
+            if(string.IsNullOrEmpty(book))
+                return BadRequest(new APIExceptionViewModel("book field is required"));
             var result = await _quotesService.QuotesByBookAsync(book, page);
-            return Ok(new APIResponseViewModel(true, result.Item1, result.Item2)); 
+            return Ok(new APIResponseViewModel(result.Item1, result.Item2)); 
+        }
+        catch (EmptyResultException)
+        {
+            return NoContent();
+        }
+        catch (PageOutOfRangeException ex)
+        {
+            return BadRequest(new APIExceptionViewModel(ex.Message));
         }
         catch (Exception ex)
         {
-            return NotFound(ex.Message);
+           return NotFound(new APIExceptionViewModel(ex.Message));
         }  
     }
 
-    [HttpGet("tag/{tag}")]
-    public async Task<ActionResult> QuotesbyTag(string tag,  int page=1){
+    [HttpGet("tag")]
+    public async Task<ActionResult> QuotesbyTag(string? tag,  int page=1){
         try
         {
+            if(string.IsNullOrEmpty(tag))
+                return BadRequest(new APIExceptionViewModel("tag field is required"));
             var result = await _quotesService.QuotesByTagAsync(tag, page);
-            return Ok(new APIResponseViewModel(true, result.Item1, result.Item2));
+            return Ok(new APIResponseViewModel(result.Item1, result.Item2));
+        }
+        catch (EmptyResultException)
+        {
+            return NoContent();
+        }
+        catch (PageOutOfRangeException ex)
+        {
+            return BadRequest(new APIExceptionViewModel(ex.Message));
         }
         catch (Exception ex)
         {
-           return NotFound(ex.Message);
+           return NotFound(new APIExceptionViewModel(ex.Message));
         }         
     }
 
@@ -84,36 +119,42 @@ public class QuotesController : Controller {
        {
             var result = await _quotesService.AddQuoteAsync(dto);
             if(result is null)
-                return NotFound("Duplicate text.");
-            return Ok(new APIResponseViewModel(true, 0, result)); 
+                return NotFound(new APIExceptionViewModel("Duplicate Text"));
+            return Ok(new APIResponseViewModel(1, result)); 
        }
        catch (Exception ex)
        {
-           return NotFound(ex.Message);
+            if(ex is MissedAuthorFieldException || ex is MissedTextFieldException)
+                return BadRequest(new APIExceptionViewModel(ex.Message));
+            return NotFound(new APIExceptionViewModel(ex.Message));
        }     
     }
     [HttpPost("addMany")]
-    public async Task<ActionResult> AddMultipleQuotes([FromBody]List<CreateQuote> dto){
+    public async Task<ActionResult> AddMultipleQuotes([FromForm]List<CreateQuote> dto){
         try
         {
             var result = await _quotesService.AddMultipleQuotesAsync(dto);
-            return Ok(new APIResponseViewModel(true,0, result)); 
+            return Ok(new APIResponseViewModel(1, result)); 
         }
         catch (Exception ex)
         {
-            return NotFound(ex.Message);
+            if(ex is MissedAuthorFieldException || ex is MissedTextFieldException)
+                return BadRequest(new APIExceptionViewModel(ex.Message));
+            return NotFound(new APIExceptionViewModel(ex.Message));
         }             
     }
-    [HttpDelete("delete/{id}")]
-    public async Task<ActionResult> DeleteQuote(string id){
+    [HttpDelete("delete")]
+    public async Task<ActionResult> DeleteQuote(string? id){
         try
         {
+            if(string.IsNullOrEmpty(id))
+                return BadRequest(new APIExceptionViewModel("id is required"));
             await _quotesService.DeleteAsync(id);
-            return Ok(new APIResponseViewModel(true));
+            return Ok(new APIResponseViewModel());
         }
         catch (Exception ex)
         {
-            return NotFound(ex.Message);
+            return NotFound(new APIExceptionViewModel(ex.Message));
         }
     }
     [HttpPut("update")]
@@ -122,13 +163,15 @@ public class QuotesController : Controller {
         {
             var result = await _quotesService.UpdateAsync(dto);
             if(result.ModifiedCount == 0)
-                return Ok(new APIResponseViewModel(false, message:"no updates applied"));
+                return StatusCode(StatusCodes.Status304NotModified);
             else
-                return Ok(new APIResponseViewModel(true));
+                return Ok(new APIResponseViewModel());
         }
         catch (Exception ex)
         {
-            return NotFound(ex.Message);
+            if(ex is MissedAuthorFieldException || ex is MissedTextFieldException)
+                return BadRequest(new APIExceptionViewModel(ex.Message));
+            return NotFound(new APIExceptionViewModel(ex.Message));
         }
     }
     [HttpGet("search")]
@@ -138,11 +181,19 @@ public class QuotesController : Controller {
             if(String.IsNullOrEmpty(keyword))
                 return await All();
             var result = await _quotesService.Search(keyword, page);
-            return Ok(new APIResponseViewModel(true, result.Item1, result.Item2));
+            return Ok(new APIResponseViewModel(result.Item1, result.Item2));
+        }
+        catch (EmptyResultException)
+        {
+            return NoContent();
+        }
+        catch (PageOutOfRangeException ex)
+        {
+            return BadRequest(new APIExceptionViewModel(ex.Message));
         }
         catch (Exception ex)
         {
-            return NotFound(ex.Message);
+            return NotFound(new APIExceptionViewModel(ex.Message));
         }
         
     }
