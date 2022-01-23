@@ -1,5 +1,8 @@
-# quotes-crud-api
-CRUD Goodreads Quotes API, it's using the database created with the code here: https://github.com/IkhlasJihad/goodreadsQuotesScrap
+# quotes-crud-api 
+    
+   Check at [Heroku](https://i-cita.herokuapp.com/)
+
+CRUD Goodreads Quotes API, it's basically using the database created with the code here: https://github.com/IkhlasJihad/goodreadsQuotesScrap
 
 
 ### Available Endpoints:
@@ -18,7 +21,3 @@ CRUD Goodreads Quotes API, it's using the database created with the code here: h
 * Pagination is supported, there are max of 30 quotes per page.
 * Default page is 1, pages allowed within the range given in the response, otherwise error message will appear.
 * Both text & author fields are required in add & update.
-
-### Sample Run:
-
-[Link on Vimeo](https://vimeo.com/667375898)
